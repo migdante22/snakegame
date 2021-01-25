@@ -3,6 +3,7 @@ package juego;
 import java.awt.Canvas;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
+import java.util.Random;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -13,8 +14,9 @@ public class ventana extends JFrame implements Runnable{
 	
 
 
-Point snake;
-imaSnake ImaSnake;
+private Point snake;
+private Point comidaPoint;
+private imaSnake ImaSnake;
 	
 private int ancho = 800;
 private int alto = 400;
@@ -25,7 +27,8 @@ private volatile boolean Activado = false;
 long frecuencia = 100000000;
 int whidthSnake = 20;
 int heigthSnake = 20;
-
+int Comidaancho = 15;
+int Comidaalto = 15;
 int direccion = KeyEvent.VK_LEFT;
 
 	public ventana () {
@@ -43,15 +46,11 @@ int direccion = KeyEvent.VK_LEFT;
 		setVisible(true);
 		addKeyListener(teclas);
 		
+		gamestar();
 		
-		snake = new Point(ancho/2, alto/2);
 		
 		ImaSnake = new imaSnake();
 		this.getContentPane().add(ImaSnake);
-
-		
-	
-		
 
 			
 	}
@@ -71,10 +70,17 @@ int direccion = KeyEvent.VK_LEFT;
 			
 			g.setColor(Color.BLUE);
 			g.fillRect(snake.x, snake.y, whidthSnake, heigthSnake);
+			
+			g.setColor(Color.RED);
+			g.fillRoundRect(comidaPoint.x, comidaPoint.y, Comidaancho, Comidaalto, 20, 20);
 		}
 	}
 	public void actualizar() {
 		ImaSnake.repaint();
+		
+		if (snake.x == comidaPoint.x && snake.y == comidaPoint.y) {
+			comidarandom();
+		}
 	}
 	
 	
@@ -109,11 +115,38 @@ int direccion = KeyEvent.VK_LEFT;
 		}
 		
 	}
-	
+	//
 	public synchronized void Inciar() {
 		Activado = true;
-		thread = new Thread(this);
+		thread = new Thread(this);// se tiene que desir endonde se ejecutara el Hilo
 		thread.start();
+	}
+	// metodo que instancia las variables point para snake y la cominda
+	public void gamestar() {
+		snake = new Point(ancho/2, alto/2);
+		comidaPoint =  new Point(20,20);
+		comidarandom();
+	}
+	
+	public void comidarandom() {
+		Random rdomRandom = new Random();
+		comidaPoint.x = rdomRandom.nextInt(ancho);
+		
+		if ((comidaPoint.x % 5) > 0) {
+			comidaPoint.x = comidaPoint.x - (comidaPoint.x % 5) ;
+		}
+		if ((comidaPoint.x < 5) ) {
+			comidaPoint.x = comidaPoint.x +10;
+		}
+		
+		comidaPoint.y = rdomRandom.nextInt(alto);
+		if ((comidaPoint.y % 5) > 0) {
+			comidaPoint.y = comidaPoint.y - (comidaPoint.y % 5) ;
+		}
+		if ((comidaPoint.y < 5) ) {
+			comidaPoint.y = comidaPoint.y +10;
+		}
+		
 	}
 	
 	public synchronized void Terminar() {
@@ -127,7 +160,7 @@ int direccion = KeyEvent.VK_LEFT;
 	}
 
 
-
+//metodo run usado como Hilo para el movimiento de la snake
 	@Override
 	public void run() {
 		long ultimo = 0;
