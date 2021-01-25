@@ -9,17 +9,24 @@ import javax.swing.JPanel;
 
 import com.sun.glass.events.KeyEvent;
 
-public class ventana extends JFrame{
+public class ventana extends JFrame implements Runnable{
 	
 
 
 Point snake;
-int snakeancho = 50;
-int snakealto = 10;
 imaSnake ImaSnake;
 	
 private int ancho = 800;
 private int alto = 400;
+
+private Thread thread;
+private volatile boolean Activado = false;
+
+long frecuencia = 100000000;
+int whidthSnake = 20;
+int heigthSnake = 20;
+
+int direccion = KeyEvent.VK_LEFT;
 
 	public ventana () {
 		
@@ -52,7 +59,7 @@ private int alto = 400;
 
 	public static void main(String[] args) {
 		ventana v = new ventana();
-		
+		v.Inciar();
 		
 	}
 	
@@ -63,13 +70,15 @@ private int alto = 400;
 			super.paintComponent(g);
 			
 			g.setColor(Color.BLUE);
-			g.fillRect(ancho/2, alto/2, 20, 20);
+			g.fillRect(snake.x, snake.y, whidthSnake, heigthSnake);
 		}
+	}
+	public void actualizar() {
+		ImaSnake.repaint();
 	}
 	
 	
-	
-	
+	// clase para detectar teclas
 	public class teclas extends KeyAdapter{
 		@Override
 		public void keyPressed(java.awt.event.KeyEvent e) {
@@ -77,9 +86,103 @@ private int alto = 400;
 			
 			if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ESCAPE) {
 				System.exit(0);
+			}else if (e.getKeyCode() == java.awt.event.KeyEvent.VK_UP) {
+				if (direccion != KeyEvent.VK_DOWN) {
+					direccion = java.awt.event.KeyEvent.VK_UP;
+				}
+			}
+			else if (e.getKeyCode() == java.awt.event.KeyEvent.VK_DOWN) {
+				if (direccion != KeyEvent.VK_UP) {
+					direccion = java.awt.event.KeyEvent.VK_DOWN;
+				}
+			}
+			else if (e.getKeyCode() == java.awt.event.KeyEvent.VK_LEFT) {
+				if (direccion != KeyEvent.VK_RIGHT) {
+					direccion = java.awt.event.KeyEvent.VK_LEFT;
+				}
+			}
+			else if (e.getKeyCode() == java.awt.event.KeyEvent.VK_RIGHT) {
+				if (direccion != KeyEvent.VK_LEFT) {
+					direccion = java.awt.event.KeyEvent.VK_RIGHT;
+				}
 			}
 		}
 		
+	}
+	
+	public synchronized void Inciar() {
+		Activado = true;
+		thread = new Thread(this);
+		thread.start();
+	}
+	
+	public synchronized void Terminar() {
+		Activado = false;
+		try {
+			thread.join();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+
+
+	@Override
+	public void run() {
+		long ultimo = 0;
+		
+		while (Activado) {
+			
+			if (System.nanoTime() - ultimo > frecuencia) {
+				
+				if (direccion == java.awt.event.KeyEvent.VK_UP) {
+					snake.y = snake.y - heigthSnake;
+					if (snake.y <0) {
+						snake.y = alto - heigthSnake;
+					}
+					if (snake.y > alto) {
+						snake.y = 0;
+					}
+				}
+				
+				if (direccion == java.awt.event.KeyEvent.VK_DOWN) {
+					snake.y = snake.y + heigthSnake;
+					if (snake.y >alto) {
+						snake.y = alto + heigthSnake;
+					}
+					if (snake.y > alto) {
+						snake.y = 0;
+					}
+				}
+				
+				if (direccion == java.awt.event.KeyEvent.VK_LEFT) {
+					snake.x = snake.x - whidthSnake;
+					if (snake.x <0) {
+						snake.x = ancho - whidthSnake;
+					}
+					if (snake.x > ancho) {
+						snake.x = 0;
+					}
+				}
+				
+				if (direccion == java.awt.event.KeyEvent.VK_RIGHT) {
+					snake.x = snake.x + whidthSnake;
+					if (snake.x >ancho) {
+						snake.x = ancho + whidthSnake;
+					}
+					if (snake.x > ancho) {
+						snake.x = 0;
+					}
+				}
+				
+				
+				actualizar();
+				
+				ultimo = System.nanoTime();
+			}
+			
+		}
 	}
 		
 
