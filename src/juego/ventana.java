@@ -72,14 +72,15 @@ int direccion = KeyEvent.VK_LEFT;
 			g.fillRect(snake.x, snake.y, whidthSnake, heigthSnake);
 			
 			g.setColor(Color.RED);
-			g.fillRoundRect(comidaPoint.x, comidaPoint.y, Comidaancho, Comidaalto, 20, 20);
+			g.fillRoundRect(comidaPoint.x, comidaPoint.y, Comidaancho, Comidaalto, 0, 0);
 		}
 	}
 	public void actualizar() {
 		ImaSnake.repaint();
 		
-		if (snake.x == comidaPoint.x && snake.y == comidaPoint.y) {
+		if ((snake.x > (comidaPoint.x -10)) && (snake.x < (comidaPoint.x +10)) && (snake.y > (comidaPoint.y -10)) && (snake.y < (comidaPoint.y -10))){
 			comidarandom();
+			System.out.println("22");
 		}
 	}
 	
@@ -131,7 +132,7 @@ int direccion = KeyEvent.VK_LEFT;
 	public void comidarandom() {
 		Random rdomRandom = new Random();
 		comidaPoint.x = rdomRandom.nextInt(ancho);
-		
+
 		if ((comidaPoint.x % 5) > 0) {
 			comidaPoint.x = comidaPoint.x - (comidaPoint.x % 5) ;
 		}
